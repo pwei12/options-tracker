@@ -1,5 +1,5 @@
-import { OptionType, TradingType } from "@/app/types";
-import { formatToOptionExpirationDate } from "@/app/utils/formatDate";
+import { OptionType } from "@/app/types";
+import { formatToOptionExpirationDate } from "@/utils/formatDate";
 import React from "react";
 import { StyleSheet, Text, View } from "react-native";
 
@@ -9,7 +9,8 @@ type OptionCardProps = {
   strikePrice: number;
   expirationDate: string;
   optionType: OptionType;
-  tradingType: TradingType;
+  buyDate: string | undefined;
+  sellDate: string | undefined;
 };
 
 const OptionCard = ({
@@ -18,10 +19,12 @@ const OptionCard = ({
   strikePrice,
   expirationDate,
   optionType,
-  tradingType,
+  buyDate,
+  sellDate,
 }: OptionCardProps) => {
+  const isExpired = new Date(expirationDate) < new Date();
   return (
-    <View style={styles.card}>
+    <View style={[styles.card, isExpired && styles.expired]}>
       <Text style={styles.name}>{name}</Text>
       <Text>
         <Text>{formatToOptionExpirationDate(expirationDate)}</Text>
@@ -30,12 +33,7 @@ const OptionCard = ({
           2,
         )}${optionType === OptionType.PUT ? "P" : "C"}`}</Text>
       </Text>
-      <Text
-        style={{ color: tradingType === TradingType.BUY ? "red" : "green" }}
-      >
-        {" "}
-        {`${tradingType === TradingType.BUY ? "-" : "+"}$${premium.toFixed(2)}`}
-      </Text>
+      <Text>{`${buyDate ? "-" : "+"}$${premium.toFixed(2)}`}</Text>
     </View>
   );
 };
@@ -62,5 +60,8 @@ const styles = StyleSheet.create({
   },
   italicText: {
     fontStyle: "italic",
+  },
+  expired: {
+    opacity: 0.5,
   },
 });
