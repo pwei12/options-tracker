@@ -1,14 +1,15 @@
-import { OptionType, TradingType } from "@/app/types";
+import { Option, OptionType } from "@/app/types";
 
-export const options = [
+export const options: Option[] = [
   {
     id: "1",
     name: "AAPL",
     premium: 150.0,
     strikePrice: 320.5,
-    expirationDate: "2024-06-30T00:00:00Z",
+    expirationDate: "2026-12-30T00:00:00Z",
     optionType: OptionType.CALL,
-    tradingType: TradingType.BUY,
+    buyDate: "2026-08-21T00:00:00Z",
+    sellDate: undefined,
   },
   {
     id: "2",
@@ -17,7 +18,8 @@ export const options = [
     strikePrice: 2800.0,
     expirationDate: "2024-07-15T00:00:00Z",
     optionType: OptionType.PUT,
-    tradingType: TradingType.SELL,
+    buyDate: undefined,
+    sellDate: "2024-07-15T00:00:00Z",
   },
   {
     id: "3",
@@ -26,7 +28,8 @@ export const options = [
     strikePrice: 3500.0,
     expirationDate: "2024-08-01T00:00:00Z",
     optionType: OptionType.CALL,
-    tradingType: TradingType.BUY,
+    buyDate: "2024-07-01T00:00:00Z",
+    sellDate: undefined,
   },
   {
     id: "4",
@@ -35,7 +38,8 @@ export const options = [
     strikePrice: 300.0,
     expirationDate: "2024-09-10T00:00:00Z",
     optionType: OptionType.PUT,
-    tradingType: TradingType.SELL,
+    buyDate: undefined,
+    sellDate: "2024-09-10T00:00:00Z",
   },
   {
     id: "5",
@@ -44,7 +48,8 @@ export const options = [
     strikePrice: 700.0,
     expirationDate: "2024-10-20T00:00:00Z",
     optionType: OptionType.CALL,
-    tradingType: TradingType.BUY,
+    buyDate: "2024-10-10T00:00:00Z",
+    sellDate: undefined,
   },
   {
     id: "6",
@@ -53,7 +58,8 @@ export const options = [
     strikePrice: 500.0,
     expirationDate: "2024-11-05T00:00:00Z",
     optionType: OptionType.PUT,
-    tradingType: TradingType.SELL,
+    buyDate: undefined,
+    sellDate: "2024-11-05T00:00:00Z",
   },
   {
     id: "7",
@@ -62,7 +68,8 @@ export const options = [
     strikePrice: 350.0,
     expirationDate: "2024-12-15T00:00:00Z",
     optionType: OptionType.CALL,
-    tradingType: TradingType.BUY,
+    buyDate: "2024-10-15T00:00:00Z",
+    sellDate: undefined,
   },
   {
     id: "8",
@@ -71,7 +78,8 @@ export const options = [
     strikePrice: 600.0,
     expirationDate: "2025-01-10T00:00:00Z",
     optionType: OptionType.PUT,
-    tradingType: TradingType.SELL,
+    buyDate: "2024-12-10T00:00:00Z",
+    sellDate: "2025-01-10T00:00:00Z",
   },
   {
     id: "9",
@@ -80,7 +88,8 @@ export const options = [
     strikePrice: 200.0,
     expirationDate: "2025-02-20T00:00:00Z",
     optionType: OptionType.CALL,
-    tradingType: TradingType.BUY,
+    buyDate: "2025-01-20T00:00:00Z",
+    sellDate: undefined,
   },
   {
     id: "10",
@@ -89,7 +98,8 @@ export const options = [
     strikePrice: 50.0,
     expirationDate: "2025-03-15T00:00:00Z",
     optionType: OptionType.PUT,
-    tradingType: TradingType.SELL,
+    buyDate: "2025-02-15T00:00:00Z",
+    sellDate: "2025-03-15T00:00:00Z",
   },
   {
     id: "11",
@@ -98,7 +108,8 @@ export const options = [
     strikePrice: 150.0,
     expirationDate: "2025-04-10T00:00:00Z",
     optionType: OptionType.CALL,
-    tradingType: TradingType.BUY,
+    buyDate: "2025-04-10T00:00:00Z",
+    sellDate: undefined,
   },
   {
     id: "12",
@@ -107,7 +118,8 @@ export const options = [
     strikePrice: 60.0,
     expirationDate: "2025-05-20T00:00:00Z",
     optionType: OptionType.PUT,
-    tradingType: TradingType.SELL,
+    buyDate: "2025-05-10T00:00:00Z",
+    sellDate: "2025-05-20T00:00:00Z",
   },
   {
     id: "13",
@@ -116,7 +128,8 @@ export const options = [
     strikePrice: 90.0,
     expirationDate: "2025-06-15T00:00:00Z",
     optionType: OptionType.CALL,
-    tradingType: TradingType.BUY,
+    buyDate: "2025-06-05T00:00:00Z",
+    sellDate: undefined,
   },
   {
     id: "14",
@@ -125,7 +138,8 @@ export const options = [
     strikePrice: 500.0,
     expirationDate: "2025-07-10T00:00:00Z",
     optionType: OptionType.PUT,
-    tradingType: TradingType.SELL,
+    buyDate: "2025-07-01T00:00:00Z",
+    sellDate: "2025-07-10T00:00:00Z",
   },
   {
     id: "15",
@@ -134,7 +148,8 @@ export const options = [
     strikePrice: 2800.0,
     expirationDate: "2025-08-20T00:00:00Z",
     optionType: OptionType.CALL,
-    tradingType: TradingType.BUY,
+    buyDate: "2025-08-02T00:00:00Z",
+    sellDate: undefined,
   },
   {
     id: "16",
@@ -143,7 +158,8 @@ export const options = [
     strikePrice: 250.0,
     expirationDate: "2025-09-15T00:00:00Z",
     optionType: OptionType.PUT,
-    tradingType: TradingType.SELL,
+    buyDate: undefined,
+    sellDate: "2025-09-15T00:00:00Z",
   },
   {
     id: "17",
@@ -152,7 +168,8 @@ export const options = [
     strikePrice: 200.0,
     expirationDate: "2025-10-10T00:00:00Z",
     optionType: OptionType.CALL,
-    tradingType: TradingType.BUY,
+    buyDate: "2025-08-10T00:00:00Z",
+    sellDate: undefined,
   },
   {
     id: "18",
@@ -161,7 +178,8 @@ export const options = [
     strikePrice: 3500.0,
     expirationDate: "2025-11-20T00:00:00Z",
     optionType: OptionType.PUT,
-    tradingType: TradingType.SELL,
+    buyDate: "2025-10-20T00:00:00Z",
+    sellDate: "2025-11-20T00:00:00Z",
   },
   {
     id: "19",
@@ -170,15 +188,17 @@ export const options = [
     strikePrice: 300.0,
     expirationDate: "2025-12-15T00:00:00Z",
     optionType: OptionType.CALL,
-    tradingType: TradingType.BUY,
+    buyDate: "2025-12-10T00:00:00Z",
+    sellDate: undefined,
   },
   {
     id: "20",
     name: "TSLA",
     premium: 65.0,
     strikePrice: 700.0,
-    expirationDate: "2026-01-10T00:00:00Z",
+    expirationDate: "2026-10-05T00:00:00Z",
     optionType: OptionType.PUT,
-    tradingType: TradingType.SELL,
+    buyDate: undefined,
+    sellDate: "2026-08-19T00:00:00Z",
   },
 ];

@@ -17,7 +17,8 @@ const List = () => {
             strikePrice={item.strikePrice}
             expirationDate={item.expirationDate}
             optionType={item.optionType}
-            tradingType={item.tradingType}
+            buyDate={item.buyDate}
+            sellDate={item.sellDate}
           />
         )}
         ItemSeparatorComponent={() => <View style={{ height: 16 }} />}
