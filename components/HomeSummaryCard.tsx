@@ -7,7 +7,7 @@ const totalProfitLoss = 1000.0;
 const HomeSummaryCard = () => {
   return (
     <View style={styles.card}>
-      <Text style={styles.title}>Total (USD)</Text>
+      <Text style={styles.title}>Net (USD)</Text>
       <Text
         style={styles.profitLossText}
       >{`${totalProfitLoss >= 0 ? "" : "-"}$${totalProfitLoss.toFixed(2)}`}</Text>
@@ -35,7 +35,6 @@ const styles = StyleSheet.create({
     height: 100,
     alignItems: "flex-end",
   },
-
   title: {
     fontSize: 10,
     color: "#555",
