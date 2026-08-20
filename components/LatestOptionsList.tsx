@@ -1,6 +1,7 @@
 import { options } from "@/constants/mock_data";
 import React from "react";
 import { FlatList, StyleSheet, Text, View } from "react-native";
+import ListEmpty from "./ListEmpty";
 import OptionCard from "./OptionCard";
 
 const LatestOptionsList = () => {
@@ -25,6 +26,16 @@ const LatestOptionsList = () => {
           />
         )}
         ItemSeparatorComponent={() => <View style={{ width: 8 }} />}
+        ListEmptyComponent={() => (
+          <ListEmpty
+            message="No option added yet."
+            containerStyle={{
+              width: "100%",
+              flex: 1,
+            }}
+          />
+        )}
+        contentContainerStyle={{ flexGrow: 1 }}
       />
     </View>
   );

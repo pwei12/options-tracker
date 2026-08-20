@@ -1,3 +1,4 @@
+import ListEmpty from "@/components/ListEmpty";
 import OptionCard from "@/components/OptionCard";
 import { options } from "@/constants/mock_data";
 import React from "react";
@@ -21,8 +22,9 @@ const List = () => {
             tradingType={item.tradingType}
           />
         )}
-        ItemSeparatorComponent={() => <View style={{ height: 16 }} />}
         showsVerticalScrollIndicator={false}
+        ItemSeparatorComponent={() => <View style={{ height: 16 }} />}
+        ListEmptyComponent={() => <ListEmpty message="No option added yet." />}
       />
     </SafeAreaView>
   );
