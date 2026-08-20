@@ -1,40 +1,49 @@
-import { OptionType } from "@/app/types";
-import { formatToOptionExpirationDate } from "@/utils/formatDate";
+import { OptionType, TradingType } from "@/types/types";
+import { formatDateToYYYYMMDD } from "@/utils/formatDate";
+import { useRouter } from "expo-router";
 import React from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, TouchableOpacity } from "react-native";
 
 type OptionCardProps = {
+  id: string;
   name: string;
   premium: number;
   strikePrice: number;
   expirationDate: string;
   optionType: OptionType;
-  buyDate: string | undefined;
-  sellDate: string | undefined;
+  tradingType: TradingType;
 };
 
 const OptionCard = ({
+  id,
   name,
   premium,
   strikePrice,
   expirationDate,
   optionType,
-  buyDate,
-  sellDate,
+  tradingType,
 }: OptionCardProps) => {
   const isExpired = new Date(expirationDate) < new Date();
+  const router = useRouter();
+
   return (
-    <View style={[styles.card, isExpired && styles.expired]}>
+    <TouchableOpacity
+      onPress={() => router.push(`/option/${encodeURIComponent(id)}`)}
+      style={[styles.card, isExpired && styles.expired]}
+    >
       <Text style={styles.name}>{name}</Text>
       <Text>
-        <Text>{formatToOptionExpirationDate(expirationDate)}</Text>
+        <Text>{formatDateToYYYYMMDD(expirationDate)}</Text>
         {` `}
         <Text style={styles.italicText}>{`${strikePrice.toFixed(
           2,
         )}${optionType === OptionType.PUT ? "P" : "C"}`}</Text>
       </Text>
-      <Text>{`${buyDate ? "-" : "+"}$${premium.toFixed(2)}`}</Text>
-    </View>
+      <Text>
+        <Text>{tradingType.toLocaleUpperCase()}</Text>{" "}
+        <Text>{`$${premium.toFixed(2)}`}</Text>
+      </Text>
+    </TouchableOpacity>
   );
 };
 

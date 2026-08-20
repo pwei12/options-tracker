@@ -15,13 +15,13 @@ const LatestOptionsList = () => {
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
           <OptionCard
+            id={item.id}
             name={item.name}
             premium={item.premium}
             strikePrice={item.strikePrice}
             expirationDate={item.expirationDate}
             optionType={item.optionType}
-            buyDate={item.buyDate}
-            sellDate={item.sellDate}
+            tradingType={item.tradingType}
           />
         )}
         ItemSeparatorComponent={() => <View style={{ width: 8 }} />}
