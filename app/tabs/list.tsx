@@ -1,3 +1,4 @@
+import ListEmpty from "@/components/ListEmpty";
 import OptionCard from "@/components/OptionCard";
 import { options } from "@/constants/mock_data";
 import React from "react";
@@ -12,17 +13,18 @@ const List = () => {
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
           <OptionCard
+            id={item.id}
             name={item.name}
             premium={item.premium}
             strikePrice={item.strikePrice}
             expirationDate={item.expirationDate}
             optionType={item.optionType}
-            buyDate={item.buyDate}
-            sellDate={item.sellDate}
+            tradingType={item.tradingType}
           />
         )}
-        ItemSeparatorComponent={() => <View style={{ height: 16 }} />}
         showsVerticalScrollIndicator={false}
+        ItemSeparatorComponent={() => <View style={{ height: 16 }} />}
+        ListEmptyComponent={() => <ListEmpty message="No option added yet." />}
       />
     </SafeAreaView>
   );

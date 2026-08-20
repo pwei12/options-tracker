@@ -2,6 +2,7 @@ import { options } from "@/constants/mock_data";
 import { Link } from "expo-router";
 import React from "react";
 import { FlatList, StyleSheet, Text, View } from "react-native";
+import ListEmpty from "./ListEmpty";
 import OptionCard from "./OptionCard";
 
 const ExpiringOptionsList = () => {
@@ -14,20 +15,22 @@ const ExpiringOptionsList = () => {
         </Link>
       </View>
       <FlatList
-        showsHorizontalScrollIndicator={false}
         // TODO: query the expiring options from the database instead of using mock data
         data={options.slice(0, 3)}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
           <OptionCard
+            id={item.id}
             name={item.name}
             premium={item.premium}
             strikePrice={item.strikePrice}
             expirationDate={item.expirationDate}
             optionType={item.optionType}
-            buyDate={item.buyDate}
-            sellDate={item.sellDate}
+            tradingType={item.tradingType}
           />
+        )}
+        ListEmptyComponent={() => (
+          <ListEmpty message="No expiring options found." />
         )}
         ItemSeparatorComponent={() => <View style={{ height: 16 }} />}
       />

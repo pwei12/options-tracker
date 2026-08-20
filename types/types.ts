@@ -3,6 +3,11 @@ export enum OptionType {
   PUT = "put",
 }
 
+export enum TradingType {
+  LONG = "long",
+  SHORT = "short",
+}
+
 export type Option = {
   id: string;
   name: string;
@@ -10,6 +15,8 @@ export type Option = {
   strikePrice: number;
   expirationDate: string;
   optionType: OptionType;
-  buyDate?: string;
-  sellDate?: string;
+  tradingType: TradingType;
+  openDate: string;
+  closeDate?: string;
+  closePrice?: number;
 };
