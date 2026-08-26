@@ -1,5 +1,5 @@
 import { OptionType, TradingType } from "@/types/types";
-import { formatDateToYYYYMMDD } from "@/utils/formatDate";
+import { formatDateToYYYYMMDD } from "@/utils/date.utils";
 import { useRouter } from "expo-router";
 import React from "react";
 import { StyleSheet, Text, TouchableOpacity } from "react-native";
