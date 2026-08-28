@@ -1,16 +1,38 @@
-import React from "react";
+import { api } from "@/convex/_generated/api";
+import { useQuery } from "convex/react";
+import React, { useMemo } from "react";
 import { StyleSheet, Text, View } from "react-native";
-
-// TODO: remove mock data and implement real data fetching logic
-const totalProfitLoss = 1000.0;
+import LoadingIndicator from "./LoadingIndicator";
 
 const HomeSummaryCard = () => {
+  const allOptions = useQuery(api.options.getAllOptions);
+
+  const totalProfitLoss = useMemo(() => {
+    const items = allOptions ?? [];
+
+    return items.reduce((total, option) => {
+      const fee = option.openFee + (option.closeFee ?? 0);
+      const closePrice = option.closePrice ?? 0;
+
+      if (option.tradingType === "short") {
+        const net = option.premium - fee - closePrice;
+        return total + net;
+      }
+
+      return total + (closePrice - option.premium - fee);
+    }, 0);
+  }, [allOptions]);
+
   return (
     <View style={styles.card}>
       <Text style={styles.title}>Net (USD)</Text>
-      <Text
-        style={styles.profitLossText}
-      >{`${totalProfitLoss >= 0 ? "" : "-"}$${totalProfitLoss.toFixed(2)}`}</Text>
+      {allOptions === undefined ? (
+        <LoadingIndicator />
+      ) : (
+        <Text
+          style={styles.profitLossText}
+        >{`${totalProfitLoss >= 0 ? "" : "-"}$${Math.abs(totalProfitLoss).toFixed(2)}`}</Text>
+      )}
     </View>
   );
 };

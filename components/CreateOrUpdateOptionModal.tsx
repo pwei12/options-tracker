@@ -1,7 +1,8 @@
 import { api } from "@/convex/_generated/api";
-import { OptionFormValues } from "@/types/types";
+import { Option, OptionFormSection, OptionFormValues } from "@/types/types";
 import { toDbDateString } from "@/utils/date.utils";
 import { useMutation } from "convex/react";
+import capitalize from "lodash/capitalize";
 import React from "react";
 import {
   Alert,
@@ -15,22 +16,54 @@ import {
 } from "react-native";
 import OptionForm from "./OptionForm";
 
+type CreateOrUpdateOptionModalProps = {
+  isOpen: boolean;
+  onClose: () => void;
+  option?: Option;
+  section?: OptionFormSection | null;
+};
+
 const CreateOrUpdateOptionModal = ({
   isOpen,
   onClose,
-}: {
-  isOpen: boolean;
-  onClose: () => void;
-}) => {
+  option,
+  section,
+}: CreateOrUpdateOptionModalProps) => {
   const createOption = useMutation(api.options.createOption);
+  const updateOption = useMutation(api.options.updateOption);
 
-  const handleCreateOption = async (values: OptionFormValues) => {
+  const initialValues = option
+    ? {
+        name: option.name,
+        premium: option.premium.toString(),
+        strikePrice: option.strikePrice.toString(),
+        expirationDate: new Date(option.expirationDate),
+        openFee: (option.openFee ?? 0).toString(),
+        openDate: new Date(option.openDate),
+        closePrice: option.closePrice
+          ? option.closePrice.toString()
+          : undefined,
+        closeFee: option.closeFee ? option.closeFee.toString() : undefined,
+        closeDate: option.closeDate ? new Date(option.closeDate) : undefined,
+        optionType: option.optionType,
+        tradingType: option.tradingType,
+      }
+    : undefined;
+
+  const handleCreateOrUpdateOption = async (values: OptionFormValues) => {
     const trimmedName = values.name.trim();
     const premium = Number(values.premium);
     const strikePrice = Number(values.strikePrice);
-    const fee = Number(values.fee);
-    const expirationDate = toDbDateString(values.expirationDate); //new Date(values.expirationDate).getTime();
-    const openDate = toDbDateString(values.openDate); //new Date(values.openDate).getTime();
+    const openFee = Number(values.openFee);
+    const closeFee = values.closeFee ? Number(values.closeFee) : undefined;
+    const closePrice = values.closePrice
+      ? Number(values.closePrice)
+      : undefined;
+    const expirationDate = toDbDateString(values.expirationDate);
+    const openDate = toDbDateString(values.openDate);
+    const closeDate = values.closeDate
+      ? toDbDateString(values.closeDate)
+      : undefined;
 
     if (!trimmedName) {
       Alert.alert("Missing details", "Please enter the option symbol.");
@@ -52,8 +85,8 @@ const CreateOrUpdateOptionModal = ({
       return;
     }
 
-    if (!values.fee) {
-      Alert.alert("Missing details", "Please enter the fee.");
+    if (!values.openFee) {
+      Alert.alert("Missing details", "Please enter the open fee.");
       return;
     }
 
@@ -66,23 +99,63 @@ const CreateOrUpdateOptionModal = ({
       Alert.alert("Invalid values", "Strike price must be a valid number.");
       return;
     }
-    try {
-      await createOption({
-        name: trimmedName,
-        premium,
-        strikePrice,
-        expirationDate,
-        optionType: values.optionType,
-        tradingType: values.tradingType,
-        fee,
-        openDate,
-      });
 
+    const createData = {
+      name: trimmedName,
+      premium,
+      strikePrice,
+      expirationDate,
+      optionType: values.optionType,
+      tradingType: values.tradingType,
+      openFee,
+      openDate,
+      closePrice,
+      closeFee,
+      closeDate,
+    };
+
+    if (option) {
+      const updateData =
+        section === "option"
+          ? {
+              name: trimmedName,
+              premium,
+              strikePrice,
+              expirationDate,
+              optionType: values.optionType,
+            }
+          : section === "trading"
+            ? {
+                tradingType: values.tradingType,
+                openFee,
+                openDate,
+                closePrice,
+                closeFee,
+                closeDate,
+              }
+            : createData;
+
+      try {
+        await updateOption({
+          id: option.id,
+          update: updateData,
+        });
+        onClose();
+        return;
+      } catch {
+        Alert.alert("Failed to update the option");
+        return;
+      }
+    }
+
+    try {
+      await createOption(createData);
       onClose();
     } catch {
       Alert.alert("Failed to create new option");
     }
   };
+
   return (
     <Modal
       animationType="slide"
@@ -96,12 +169,22 @@ const CreateOrUpdateOptionModal = ({
       >
         <View style={styles.modalCard}>
           <View style={styles.headerRow}>
-            <Text style={styles.title}>New Option</Text>
+            <Text style={styles.title}>
+              {option && section
+                ? `${capitalize(section)} Details`
+                : option
+                  ? "Edit option"
+                  : "New Option"}
+            </Text>
             <Pressable onPress={onClose} style={styles.closeButton}>
               <Text style={styles.closeButtonText}>×</Text>
             </Pressable>
           </View>
-          <OptionForm onSubmit={handleCreateOption} />
+          <OptionForm
+            onSubmit={handleCreateOrUpdateOption}
+            initialValues={initialValues}
+            section={section}
+          />
         </View>
       </KeyboardAvoidingView>
     </Modal>

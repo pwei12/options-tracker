@@ -1,11 +1,17 @@
-import { options } from "@/constants/mock_data";
+import { api } from "@/convex/_generated/api";
+import { useQuery } from "convex/react";
 import { Link } from "expo-router";
 import React from "react";
 import { FlatList, StyleSheet, Text, View } from "react-native";
 import ListEmpty from "./ListEmpty";
+import LoadingIndicator from "./LoadingIndicator";
 import OptionCard from "./OptionCard";
 
 const ExpiringOptionsList = () => {
+  const expiringOptions = useQuery(api.options.getSoonestExpiringOptions, {
+    limit: 3,
+  });
+
   return (
     <View style={styles.container}>
       <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
@@ -14,26 +20,19 @@ const ExpiringOptionsList = () => {
           All
         </Link>
       </View>
-      <FlatList
-        // TODO: query the expiring options from the database instead of using mock data
-        data={options.slice(0, 3)}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <OptionCard
-            id={item.id}
-            name={item.name}
-            premium={item.premium}
-            strikePrice={item.strikePrice}
-            expirationDate={item.expirationDate}
-            optionType={item.optionType}
-            tradingType={item.tradingType}
-          />
-        )}
-        ListEmptyComponent={() => (
-          <ListEmpty message="No expiring options found." />
-        )}
-        ItemSeparatorComponent={() => <View style={{ height: 16 }} />}
-      />
+      {expiringOptions === undefined ? (
+        <LoadingIndicator />
+      ) : (
+        <FlatList
+          data={expiringOptions}
+          keyExtractor={(item) => item._id}
+          renderItem={({ item }) => <OptionCard option={item} />}
+          ListEmptyComponent={() => (
+            <ListEmpty message="No expiring options found." />
+          )}
+          ItemSeparatorComponent={() => <View style={{ height: 16 }} />}
+        />
+      )}
     </View>
   );
 };

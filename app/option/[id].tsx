@@ -1,10 +1,17 @@
-import { options } from "@/constants/mock_data";
-import { formatDateWithSeparator } from "@/utils/formatDate";
+import CreateOrUpdateOptionModal from "@/components/CreateOrUpdateOptionModal";
+import LoadingIndicator from "@/components/LoadingIndicator";
+import StatusTag from "@/components/StatusTag";
+import { api } from "@/convex/_generated/api";
+import { Id } from "@/convex/_generated/dataModel";
+import { contractSize } from "@/styles/constants";
+import { formatDateWithSeparator } from "@/utils/date.utils";
+import Ionicons from "@expo/vector-icons/Ionicons";
+import { useQuery } from "convex/react";
 import { useLocalSearchParams } from "expo-router";
-import React from "react";
-import { FlatList, StyleSheet, Text, View } from "react-native";
+import React, { useState } from "react";
+import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { OptionType, TradingType } from "../../types/types";
+import { Option, OptionFormSection } from "../../types/types";
 
 const DetailItemLayout = ({
   label,
@@ -26,11 +33,44 @@ const DetailItemLayout = ({
 };
 
 const OptionDetail = () => {
-  const { id } = useLocalSearchParams();
-  //   TODO: query the option by id from the database instead of using mock data
-  const option = options.find((o) => o.id === id);
+  const { id: routeId } = useLocalSearchParams<{ id?: string | string[] }>();
+  const id = Array.isArray(routeId) ? routeId[0] : (routeId ?? "");
 
-  if (!option) {
+  const [editModalState, setEditModalState] = useState<{
+    isOpen: boolean;
+    section: OptionFormSection | null;
+  }>({
+    isOpen: false,
+    section: null,
+  });
+  const dbOption = useQuery(api.options.getOptionById, {
+    id: id as Id<"options">,
+  });
+
+  const option: Option | null = dbOption
+    ? {
+        id: dbOption._id,
+        name: dbOption.name,
+        premium: dbOption.premium,
+        strikePrice: dbOption.strikePrice,
+        expirationDate: dbOption.expirationDate,
+        optionType: dbOption.optionType,
+        tradingType: dbOption.tradingType,
+        openFee: dbOption.openFee,
+        closeFee: dbOption.closeFee,
+        openDate: dbOption.openDate,
+        closeDate: dbOption.closeDate
+          ? new Date(dbOption.closeDate).toISOString()
+          : undefined,
+        closePrice: dbOption.closePrice,
+      }
+    : null;
+
+  if (option === undefined) {
+    return <LoadingIndicator />;
+  }
+
+  if (option === null) {
     return (
       <View style={styles.container}>
         <Text>Option not found</Text>
@@ -46,97 +86,147 @@ const OptionDetail = () => {
     optionType,
     tradingType,
     openDate,
-    closeDate,
+    openFee,
     closePrice,
+    closeFee,
+    closeDate,
   } = option;
 
-  const net =
-    tradingType === TradingType.SHORT
+  const profitOrLoss =
+    tradingType === "short"
       ? premium - (closePrice ?? 0)
       : (closePrice ?? 0) - premium;
+  const net = profitOrLoss - openFee - (closeFee ?? 0);
 
-  const isExpired = new Date(expirationDate) < new Date();
+  const hasExpired = new Date(expirationDate) < new Date();
+  const isClosed = closePrice !== undefined;
+
+  const optionDetails = [
+    {
+      label: "Type",
+      value: optionType.toLocaleUpperCase(),
+    },
+    { label: "Strike Price", value: `$${strikePrice.toFixed(2)}` },
+    { label: "Premium", value: `$${premium.toFixed(2)}` },
+    {
+      label: "Expiration",
+      value: formatDateWithSeparator(expirationDate),
+      valueStyle: hasExpired ? styles.expiredValue : undefined,
+    },
+  ];
+
+  const tradingDetails = [
+    {
+      label: "Trading Type",
+      value: tradingType.toLocaleUpperCase(),
+    },
+    {
+      label: "Open Price",
+      value: `$${premium.toFixed(2)}`,
+    },
+    {
+      label: "Close Price",
+      value: closePrice ? `$${closePrice.toFixed(2)}` : "-",
+    },
+    {
+      label: "Open Fee",
+      value: `$${openFee.toFixed(2)}`,
+    },
+    {
+      label: "Close Fee",
+      value: closeFee ? `$${closeFee.toFixed(2)}` : "-",
+    },
+    {
+      label: "Open Date",
+      value: openDate ? formatDateWithSeparator(openDate) : "-",
+    },
+    {
+      label: "Close Date",
+      value: closeDate ? formatDateWithSeparator(closeDate) : "-",
+    },
+  ];
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.summaryContainer}>
-        <Text style={styles.title}>{name}</Text>
-        <DetailItemLayout
-          label="Profit/Loss (USD)"
-          value={`$${net.toFixed(2)}`}
-          labelStyle={styles.darkLabel}
-        />
-        <DetailItemLayout
-          label="ROI"
-          value={`${((net / strikePrice) * 100).toFixed(2)}%`}
-          labelStyle={styles.darkLabel}
-        />
-      </View>
+      <ScrollView
+        style={styles.scrollView}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scrollContent}
+      >
+        <View style={styles.summaryContainer}>
+          <View>
+            <Text style={styles.title}>{name}</Text>
+            <StatusTag hasExpired={hasExpired} isClosed={isClosed} />
+          </View>
+          <DetailItemLayout
+            label="Profit/Loss (USD)"
+            value={`$${net.toFixed(2)}`}
+            labelStyle={styles.darkLabel}
+          />
+          <DetailItemLayout
+            label="ROI"
+            value={`${((net / (strikePrice * contractSize)) * 100).toFixed(2)}%`}
+            labelStyle={styles.darkLabel}
+          />
+        </View>
 
-      <View style={styles.sectionContainer}>
-        <Text style={styles.title}>Option Details</Text>
-        <FlatList
-          keyExtractor={(item) => item.label}
-          data={[
-            {
-              label: "Type",
-              value: optionType === OptionType.PUT ? "Put" : "Call",
-            },
-            { label: "Strike Price", value: `$${strikePrice.toFixed(2)}` },
-            { label: "Premium", value: `$${premium.toFixed(2)}` },
-            {
-              label: "Expiration",
-              value: formatDateWithSeparator(expirationDate),
-              valueStyle: isExpired ? styles.expiredValue : undefined,
-            },
-          ]}
-          renderItem={({ item }) => (
-            <DetailItemLayout
-              label={item.label}
-              value={item.value}
-              valueStyle={item.valueStyle}
-            />
-          )}
-          ItemSeparatorComponent={() => <View style={{ height: 12 }} />}
-          style={styles.detailsContainer}
-          showsVerticalScrollIndicator={false}
-        />
-      </View>
+        <View style={styles.sectionContainer}>
+          <View style={styles.headerRow}>
+            <Text style={styles.title}>Option Details</Text>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Edit option"
+              onPress={() =>
+                setEditModalState({ isOpen: true, section: "option" })
+              }
+              style={styles.editButton}
+            >
+              <Ionicons name="pencil" size={18} color="#1f2937" />
+            </Pressable>
+          </View>
+          <View style={styles.detailsContainer}>
+            {optionDetails.map((item) => (
+              <View key={item.label} style={styles.detailRow}>
+                <DetailItemLayout
+                  label={item.label}
+                  value={item.value}
+                  valueStyle={item.valueStyle}
+                />
+              </View>
+            ))}
+          </View>
+        </View>
 
-      <View style={styles.sectionContainer}>
-        <Text style={styles.title}>Trading Details</Text>
-        <FlatList
-          keyExtractor={(item) => item.label}
-          data={[
-            {
-              label: "Open Price",
-              value: `$${premium.toFixed(2)}`,
-            },
-            {
-              label: "Close Price",
-              value: closePrice ? `$${closePrice.toFixed(2)}` : "-",
-            },
-            {
-              label: "Trading Type",
-              value: tradingType === TradingType.SHORT ? "Short" : "Long",
-            },
-            {
-              label: "Open Date",
-              value: openDate ? formatDateWithSeparator(openDate) : "-",
-            },
-            {
-              label: "Close Date",
-              value: closeDate ? formatDateWithSeparator(closeDate) : "-",
-            },
-          ]}
-          renderItem={({ item }) => (
-            <DetailItemLayout label={item.label} value={item.value} />
-          )}
-          ItemSeparatorComponent={() => <View style={{ height: 12 }} />}
-          style={styles.detailsContainer}
-          showsVerticalScrollIndicator={false}
-        />
-      </View>
+        <View style={styles.sectionContainer}>
+          <View style={styles.headerRow}>
+            <Text style={styles.title}>Trading Details</Text>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Edit option"
+              onPress={() =>
+                setEditModalState({ isOpen: true, section: "trading" })
+              }
+              style={styles.editButton}
+            >
+              <Ionicons name="pencil" size={16} color="#1f2937" />
+            </Pressable>
+          </View>
+          <View style={styles.detailsContainer}>
+            {tradingDetails.map((item) => (
+              <View key={item.label} style={styles.detailRow}>
+                <DetailItemLayout label={item.label} value={item.value} />
+              </View>
+            ))}
+          </View>
+        </View>
+      </ScrollView>
+
+      <CreateOrUpdateOptionModal
+        isOpen={editModalState.isOpen}
+        onClose={() => setEditModalState({ isOpen: false, section: null })}
+        option={option}
+        section={editModalState.section}
+      />
     </SafeAreaView>
   );
 };
@@ -147,6 +237,12 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 12,
+  },
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    paddingBottom: 24,
   },
   summaryContainer: {
     flexDirection: "row",
@@ -167,10 +263,26 @@ const styles = StyleSheet.create({
   sectionContainer: {
     marginVertical: 16,
   },
+  headerRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 12,
+  },
   title: {
     fontWeight: "bold",
     fontSize: 20,
-    marginBottom: 12,
+  },
+  statusTagLabel: {
+    fontSize: 12,
+  },
+  editButton: {
+    width: 32,
+    height: 32,
+    borderRadius: 19,
+    backgroundColor: "#dbeafe",
+    alignItems: "center",
+    justifyContent: "center",
   },
   detailsContainer: {
     backgroundColor: "#f9f9f9",
@@ -184,6 +296,9 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
     elevation: 5,
+  },
+  detailRow: {
+    marginBottom: 12,
   },
   label: {
     fontSize: 12,

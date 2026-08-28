@@ -1,13 +1,14 @@
 import { placeholderColor } from "@/styles/constants";
 import {
     optionFormSchema,
+    OptionFormSection,
     OptionFormValues,
     optionTypeValues,
     tradingTypeValues,
 } from "@/types/types";
 import { getToday } from "@/utils/date.utils";
 import { zodResolver } from "@hookform/resolvers/zod";
-import React from "react";
+import React, { useEffect } from "react";
 import { Controller, useForm } from "react-hook-form";
 import {
     Pressable,
@@ -20,229 +21,339 @@ import {
 import DatePickerInput from "./DatePickerInput";
 import FormLabel from "./FormLabel";
 
-type OptionFormProps = {
-  onSubmit: (values: OptionFormValues) => Promise<void>;
+const defaultFormValues: OptionFormValues = {
+  name: "",
+  premium: "",
+  strikePrice: "",
+  expirationDate: getToday(),
+  openFee: "",
+  openDate: getToday(),
+  optionType: "call",
+  tradingType: "long",
+  closePrice: undefined,
+  closeFee: undefined,
+  closeDate: undefined,
 };
 
-const OptionForm = ({ onSubmit }: OptionFormProps) => {
+type OptionFormProps = {
+  onSubmit: (values: OptionFormValues) => Promise<void>;
+  initialValues?: Partial<OptionFormValues>;
+  section?: OptionFormSection | null;
+};
+
+const OptionForm = ({ onSubmit, initialValues, section }: OptionFormProps) => {
   const {
     control,
     handleSubmit,
     formState: { errors },
+    reset,
     setValue,
     watch,
   } = useForm<OptionFormValues>({
     resolver: zodResolver(optionFormSchema),
-    defaultValues: {
-      name: "",
-      premium: "",
-      strikePrice: "",
-      expirationDate: getToday(),
-      fee: "",
-      optionType: "call",
-      tradingType: "long",
-      openDate: getToday(),
-    },
+    defaultValues: defaultFormValues,
   });
-  console.log("form errors", errors);
 
   const selectedOptionType = watch("optionType");
   const selectedTradingType = watch("tradingType");
+  const isOptionDetailsSection = section === "option";
+  const isTradingDetailsSection = section === "trading";
+
+  useEffect(() => {
+    reset(initialValues ?? defaultFormValues);
+  }, [initialValues, reset]);
 
   return (
-    <View style={styles.container}>
+    <View
+      style={[styles.container, { ...(!!section && { paddingBottom: 0 }) }]}
+    >
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.formContent}
       >
-        <View style={styles.fieldGroup}>
-          <FormLabel label="Symbol" isRequired />
-          <Controller
-            control={control}
-            name="name"
-            render={({ field: { onChange, onBlur, value } }) => (
-              <TextInput
-                onBlur={onBlur}
-                onChangeText={onChange}
-                value={value}
-                autoCapitalize="characters"
-                placeholder="AAPL"
-                placeholderTextColor={placeholderColor}
-                style={styles.input}
-              />
+        {(!section || isOptionDetailsSection) && (
+          <View style={styles.fieldGroup}>
+            <FormLabel label="Symbol" isRequired />
+            <Controller
+              control={control}
+              name="name"
+              render={({ field: { onChange, onBlur, value } }) => (
+                <TextInput
+                  onBlur={onBlur}
+                  onChangeText={onChange}
+                  value={value}
+                  autoCapitalize="characters"
+                  placeholder="AAPL"
+                  placeholderTextColor={placeholderColor}
+                  style={styles.input}
+                />
+              )}
+            />
+            {errors.name && (
+              <Text style={styles.errorText}>{errors.name.message}</Text>
             )}
-          />
-          {errors.name && (
-            <Text style={styles.errorText}>{errors.name.message}</Text>
-          )}
-        </View>
+          </View>
+        )}
 
-        <View style={styles.fieldGroup}>
-          <FormLabel label="Premium (USD)" isRequired />
-          <Controller
-            control={control}
-            name="premium"
-            render={({ field: { onChange, onBlur, value } }) => (
-              <TextInput
-                onBlur={onBlur}
-                onChangeText={onChange}
-                keyboardType="decimal-pad"
-                value={value}
-                placeholder="12.50"
-                placeholderTextColor={placeholderColor}
-                style={styles.input}
-              />
+        {(!section || isOptionDetailsSection) && (
+          <View style={styles.fieldGroup}>
+            <FormLabel label="Premium (USD)" isRequired />
+            <Controller
+              control={control}
+              name="premium"
+              render={({ field: { onChange, onBlur, value } }) => (
+                <TextInput
+                  onBlur={onBlur}
+                  onChangeText={onChange}
+                  keyboardType="decimal-pad"
+                  value={value}
+                  placeholder="12.50"
+                  placeholderTextColor={placeholderColor}
+                  style={styles.input}
+                />
+              )}
+            />
+            {errors.premium && (
+              <Text style={styles.errorText}>{errors.premium.message}</Text>
             )}
-          />
-          {errors.premium && (
-            <Text style={styles.errorText}>{errors.premium.message}</Text>
-          )}
-        </View>
+          </View>
+        )}
 
-        <View style={styles.fieldGroup}>
-          <FormLabel label="Strike Price" isRequired />
-          <Controller
-            control={control}
-            name="strikePrice"
-            render={({ field: { onChange, onBlur, value } }) => (
-              <TextInput
-                onBlur={onBlur}
-                onChangeText={onChange}
-                value={value}
-                keyboardType="decimal-pad"
-                placeholder="220.00"
-                placeholderTextColor={placeholderColor}
-                style={styles.input}
-              />
+        {(!section || isOptionDetailsSection) && (
+          <View style={styles.fieldGroup}>
+            <FormLabel label="Strike Price" isRequired />
+            <Controller
+              control={control}
+              name="strikePrice"
+              render={({ field: { onChange, onBlur, value } }) => (
+                <TextInput
+                  onBlur={onBlur}
+                  onChangeText={onChange}
+                  value={value}
+                  keyboardType="decimal-pad"
+                  placeholder="220.00"
+                  placeholderTextColor={placeholderColor}
+                  style={styles.input}
+                />
+              )}
+            />
+            {errors.strikePrice && (
+              <Text style={styles.errorText}>{errors.strikePrice.message}</Text>
             )}
-          />
-          {errors.strikePrice && (
-            <Text style={styles.errorText}>{errors.strikePrice.message}</Text>
-          )}
-        </View>
+          </View>
+        )}
 
-        <View style={styles.fieldGroup}>
-          <FormLabel label="Fee (USD)" isRequired />
-          <Controller
-            control={control}
-            name="fee"
-            render={({ field: { onChange, onBlur, value } }) => (
-              <TextInput
-                onBlur={onBlur}
-                onChangeText={onChange}
-                value={value}
-                keyboardType="decimal-pad"
-                placeholder="1.53"
-                placeholderTextColor={placeholderColor}
-                style={styles.input}
-              />
+        {(!section || isOptionDetailsSection) && (
+          <View style={styles.fieldGroup}>
+            <FormLabel label="Expiration Date" isRequired />
+            <Controller
+              control={control}
+              name="expirationDate"
+              render={({
+                field: { onChange, value },
+                fieldState: { error },
+              }) => (
+                <DatePickerInput
+                  value={value}
+                  onChange={onChange}
+                  error={error?.message}
+                />
+              )}
+            />
+            {errors.expirationDate && (
+              <Text style={styles.errorText}>
+                {errors.expirationDate.message}
+              </Text>
             )}
-          />
-          {errors.fee && (
-            <Text style={styles.errorText}>{errors.fee.message}</Text>
-          )}
-        </View>
+          </View>
+        )}
 
-        <View style={styles.fieldGroup}>
-          <FormLabel label="Expiration Date" isRequired />
-          <Controller
-            control={control}
-            name="expirationDate"
-            render={({ field: { onChange, value }, fieldState: { error } }) => (
-              <DatePickerInput
-                value={value}
-                onChange={onChange}
-                error={error?.message}
-                maximumDate={new Date()}
-              />
+        {(!section || isTradingDetailsSection) && (
+          <View style={styles.fieldGroup}>
+            <FormLabel label="Open fee (USD)" isRequired />
+            <Controller
+              control={control}
+              name="openFee"
+              render={({ field: { onChange, onBlur, value } }) => (
+                <TextInput
+                  onBlur={onBlur}
+                  onChangeText={onChange}
+                  value={value}
+                  keyboardType="decimal-pad"
+                  placeholder="1.53"
+                  placeholderTextColor={placeholderColor}
+                  style={styles.input}
+                />
+              )}
+            />
+            {errors.openFee && (
+              <Text style={styles.errorText}>{errors.openFee.message}</Text>
             )}
-          />
-          {errors.expirationDate && (
-            <Text style={styles.errorText}>
-              {errors.expirationDate.message}
-            </Text>
-          )}
-        </View>
+          </View>
+        )}
 
-        <View style={styles.fieldGroup}>
-          <FormLabel label="Open Date" isRequired />
-          <Controller
-            control={control}
-            name="openDate"
-            render={({ field: { onChange, value }, fieldState: { error } }) => (
-              <DatePickerInput
-                value={value}
-                onChange={onChange}
-                error={error?.message}
-                maximumDate={new Date()}
-              />
+        {(!section || isTradingDetailsSection) && (
+          <View style={styles.fieldGroup}>
+            <FormLabel label="Open Date" isRequired />
+            <Controller
+              control={control}
+              name="openDate"
+              render={({
+                field: { onChange, value },
+                fieldState: { error },
+              }) => (
+                <DatePickerInput
+                  value={value}
+                  onChange={onChange}
+                  error={error?.message}
+                />
+              )}
+            />
+            {errors.openDate && (
+              <Text style={styles.errorText}>{errors.openDate.message}</Text>
             )}
-          />
-          {errors.openDate && (
-            <Text style={styles.errorText}>{errors.openDate.message}</Text>
-          )}
-        </View>
+          </View>
+        )}
 
-        <View style={styles.fieldGroup}>
-          <FormLabel label="Option Type" isRequired />
-          <View style={styles.optionRow}>
-            {optionTypeValues.map((optionType) => (
-              <Pressable
-                key={optionType}
-                onPress={() =>
-                  setValue("optionType", optionType, { shouldValidate: true })
-                }
-                style={[
-                  styles.optionButton,
-                  selectedOptionType === optionType &&
-                    styles.optionButtonSelected,
-                ]}
-              >
-                <Text
+        {(!section || isTradingDetailsSection) && (
+          <View style={styles.fieldGroup}>
+            <FormLabel label="Close price (USD)" />
+            <Controller
+              control={control}
+              name="closePrice"
+              render={({ field: { onChange, onBlur, value } }) => (
+                <TextInput
+                  onBlur={onBlur}
+                  onChangeText={onChange}
+                  value={value}
+                  keyboardType="decimal-pad"
+                  placeholder="1.53"
+                  placeholderTextColor={placeholderColor}
+                  style={styles.input}
+                />
+              )}
+            />
+            {errors.closeFee && (
+              <Text style={styles.errorText}>{errors.closeFee.message}</Text>
+            )}
+          </View>
+        )}
+
+        {(!section || isTradingDetailsSection) && (
+          <View style={styles.fieldGroup}>
+            <FormLabel label="Close fee (USD)" />
+            <Controller
+              control={control}
+              name="closeFee"
+              render={({ field: { onChange, onBlur, value } }) => (
+                <TextInput
+                  onBlur={onBlur}
+                  onChangeText={onChange}
+                  value={value}
+                  keyboardType="decimal-pad"
+                  placeholder="1.53"
+                  placeholderTextColor={placeholderColor}
+                  style={styles.input}
+                />
+              )}
+            />
+            {errors.closeFee && (
+              <Text style={styles.errorText}>{errors.closeFee.message}</Text>
+            )}
+          </View>
+        )}
+
+        {(!section || isTradingDetailsSection) && (
+          <View style={styles.fieldGroup}>
+            <FormLabel label="Close Date" />
+            <Controller
+              control={control}
+              name="closeDate"
+              render={({
+                field: { onChange, value },
+                fieldState: { error },
+              }) => (
+                <DatePickerInput
+                  value={value}
+                  onChange={onChange}
+                  error={error?.message}
+                />
+              )}
+            />
+            {errors.closeDate && (
+              <Text style={styles.errorText}>{errors.closeDate.message}</Text>
+            )}
+          </View>
+        )}
+
+        {(!section || isOptionDetailsSection) && (
+          <View style={styles.fieldGroup}>
+            <FormLabel label="Option Type" isRequired />
+            <View style={styles.optionRow}>
+              {optionTypeValues.map((optionType) => (
+                <Pressable
+                  key={optionType}
+                  onPress={() =>
+                    setValue("optionType", optionType, { shouldValidate: true })
+                  }
                   style={[
-                    styles.optionButtonText,
+                    styles.optionButton,
                     selectedOptionType === optionType &&
-                      styles.optionButtonTextSelected,
+                      styles.optionButtonSelected,
                   ]}
                 >
-                  {optionType.toUpperCase()}
-                </Text>
-              </Pressable>
-            ))}
+                  <Text
+                    style={[
+                      styles.optionButtonText,
+                      selectedOptionType === optionType &&
+                        styles.optionButtonTextSelected,
+                    ]}
+                  >
+                    {optionType.toUpperCase()}
+                  </Text>
+                </Pressable>
+              ))}
+            </View>
           </View>
-        </View>
+        )}
 
-        <View style={styles.fieldGroup}>
-          <FormLabel label="Trade Type" isRequired />
-          <View style={styles.optionRow}>
-            {tradingTypeValues.map((tradingType) => (
-              <Pressable
-                key={tradingType}
-                onPress={() =>
-                  setValue("tradingType", tradingType, { shouldValidate: true })
-                }
-                style={[
-                  styles.optionButton,
-                  selectedTradingType === tradingType &&
-                    styles.optionButtonSelected,
-                ]}
-              >
-                <Text
+        {(!section || isTradingDetailsSection) && (
+          <View style={styles.fieldGroup}>
+            <FormLabel label="Position Type" isRequired />
+            <View style={styles.optionRow}>
+              {tradingTypeValues.map((tradingType) => (
+                <Pressable
+                  key={tradingType}
+                  onPress={() =>
+                    setValue("tradingType", tradingType, {
+                      shouldValidate: true,
+                    })
+                  }
                   style={[
-                    styles.optionButtonText,
+                    styles.optionButton,
                     selectedTradingType === tradingType &&
-                      styles.optionButtonTextSelected,
+                      styles.optionButtonSelected,
                   ]}
                 >
-                  {tradingType.toUpperCase()}
-                </Text>
-              </Pressable>
-            ))}
+                  <Text
+                    style={[
+                      styles.optionButtonText,
+                      selectedTradingType === tradingType &&
+                        styles.optionButtonTextSelected,
+                    ]}
+                  >
+                    {tradingType.toUpperCase()}
+                  </Text>
+                </Pressable>
+              ))}
+            </View>
           </View>
-        </View>
+        )}
       </ScrollView>
       <Pressable onPress={handleSubmit(onSubmit)} style={styles.submitButton}>
-        <Text style={styles.submitButtonText}>Create</Text>
+        <Text style={styles.submitButtonText}>
+          {initialValues ? "Update" : "Create"}
+        </Text>
       </Pressable>
     </View>
   );
@@ -260,12 +371,6 @@ const styles = StyleSheet.create({
   fieldGroup: {
     marginBottom: 16,
   },
-  //   label: {
-  //     fontSize: 14,
-  //     fontWeight: "600",
-  //     color: "#374151",
-  //     marginBottom: 8,
-  //   },
   input: {
     borderWidth: 1,
     borderColor: "#d1d5db",

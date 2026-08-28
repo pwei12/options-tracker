@@ -6,7 +6,7 @@ import React, { useState } from "react";
 import { Platform, Pressable, StyleSheet, Text, View } from "react-native";
 
 type DatePickerProps = {
-  value: Date;
+  value: Date | undefined;
   onChange: (date: Date) => void;
   error?: string;
   disabled?: boolean;
@@ -97,7 +97,7 @@ const DatePickerInput = ({
 
       {isOpen && (
         <DateTimePicker
-          value={value}
+          value={value ?? new Date()}
           mode="date"
           display={Platform.OS === "ios" ? "spinner" : "default"}
           minimumDate={minimumDate}
