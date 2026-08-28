@@ -7,11 +7,48 @@ import { optionFields } from "./schema";
 export const getPaginatedList = query({
   args: { paginationOpts: paginationOptsValidator },
   handler: async (ctx, args) => {
-    const options = await ctx.db
+    return await ctx.db
       .query("options")
+      .withIndex("by_openDate")
       .order("desc")
       .paginate(args.paginationOpts);
-    return options;
+  },
+});
+
+export const getLatestOptions = query({
+  args: { limit: v.number() },
+  handler: async (ctx, args) => {
+    return await ctx.db
+      .query("options")
+      .withIndex("by_openDate")
+      .order("desc")
+      .take(args.limit);
+  },
+});
+
+export const getAllOptions = query({
+  handler: async (ctx) => {
+    return await ctx.db.query("options").order("desc").collect();
+  },
+});
+
+export const getSoonestExpiringOptions = query({
+  args: { limit: v.number() },
+  handler: async (ctx, args) => {
+    const today = new Date().toISOString().slice(0, 10);
+
+    return await ctx.db
+      .query("options")
+      .withIndex("by_expirationDate", (q) => q.gte("expirationDate", today))
+      .order("asc")
+      .take(args.limit);
+  },
+});
+
+export const getOptionById = query({
+  args: { id: v.id("options") },
+  handler: async (ctx, args) => {
+    return await ctx.db.get("options", args.id);
   },
 });
 

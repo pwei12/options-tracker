@@ -1,34 +1,24 @@
 import React from "react";
 import { StyleSheet, Text, View } from "react-native";
 
-const ListEmpty = ({
-  message,
-  containerStyle,
-  messageStyle,
-}: {
-  message?: string;
-  containerStyle?: object;
-  messageStyle?: object;
-}) => {
+const LoadingIndicator = () => {
   return (
-    <View style={[styles.emptyListContainer, containerStyle]}>
-      <Text style={messageStyle}>{message ?? "No options available."}</Text>
+    <View style={styles.container}>
+      <Text>Loading...</Text>
     </View>
   );
 };
 
-export default ListEmpty;
+export default LoadingIndicator;
 
 const styles = StyleSheet.create({
-  emptyListContainer: {
+  container: {
     alignItems: "center",
     justifyContent: "center",
     padding: 16,
     backgroundColor: "#fff",
     borderRadius: 8,
     height: 100,
-    width: "100%",
-    flex: 1,
     shadowColor: "#000",
     shadowOffset: {
       width: 0,
@@ -36,6 +26,6 @@ const styles = StyleSheet.create({
     },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
-    elevation: 2.5,
+    elevation: 5,
   },
 });

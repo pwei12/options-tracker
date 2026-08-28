@@ -8,6 +8,7 @@
  * @module
  */
 
+import type * as migrations from "../migrations.js";
 import type * as options from "../options.js";
 
 import type {
@@ -17,6 +18,7 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  migrations: typeof migrations;
   options: typeof options;
 }>;
 
@@ -46,4 +48,6 @@ export declare const internal: FilterApi<
   FunctionReference<any, "internal">
 >;
 
-export declare const components: {};
+export declare const components: {
+  migrations: import("@convex-dev/migrations/_generated/component.js").ComponentApi<"migrations">;
+};

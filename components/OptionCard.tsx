@@ -1,47 +1,38 @@
-import { OptionType, TradingType } from "@/types/types";
-import { formatDateToYYYYMMDD } from "@/utils/formatDate";
+import { Doc } from "@/convex/_generated/dataModel";
+import { formatDateToYYYYMMDD } from "@/utils/date.utils";
 import { useRouter } from "expo-router";
 import React from "react";
-import { StyleSheet, Text, TouchableOpacity } from "react-native";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import StatusTag from "./StatusTag";
 
 type OptionCardProps = {
-  id: string;
-  name: string;
-  premium: number;
-  strikePrice: number;
-  expirationDate: string;
-  optionType: OptionType;
-  tradingType: TradingType;
+  option: Doc<"options">;
 };
 
-const OptionCard = ({
-  id,
-  name,
-  premium,
-  strikePrice,
-  expirationDate,
-  optionType,
-  tradingType,
-}: OptionCardProps) => {
-  const isExpired = new Date(expirationDate) < new Date();
+const OptionCard = ({ option }: OptionCardProps) => {
   const router = useRouter();
+  const hasExpired = new Date(option.expirationDate) < new Date();
+  const isClosed = option.closePrice !== undefined;
 
   return (
     <TouchableOpacity
-      onPress={() => router.push(`/option/${encodeURIComponent(id)}`)}
-      style={[styles.card, isExpired && styles.expired]}
+      onPress={() => router.push(`/option/${encodeURIComponent(option._id)}`)}
+      style={[styles.card, hasExpired && styles.expired]}
     >
-      <Text style={styles.name}>{name}</Text>
+      <View style={styles.nameContainer}>
+        <Text style={styles.name}>{option.name}</Text>
+        <StatusTag hasExpired={hasExpired} isClosed={isClosed} />
+      </View>
       <Text>
-        <Text>{formatDateToYYYYMMDD(expirationDate)}</Text>
+        <Text>{formatDateToYYYYMMDD(option.expirationDate)}</Text>
         {` `}
-        <Text style={styles.italicText}>{`${strikePrice.toFixed(
+        <Text style={styles.italicText}>{`${option.strikePrice.toFixed(
           2,
-        )}${optionType === OptionType.PUT ? "P" : "C"}`}</Text>
+        )}${option.optionType === "put" ? "P" : "C"}`}</Text>
       </Text>
       <Text>
-        <Text>{tradingType.toLocaleUpperCase()}</Text>{" "}
-        <Text>{`$${premium.toFixed(2)}`}</Text>
+        <Text>{option.tradingType.toLocaleUpperCase()}</Text>{" "}
+        <Text>{`$${option.premium.toFixed(2)}`}</Text>
       </Text>
     </TouchableOpacity>
   );
@@ -50,6 +41,10 @@ const OptionCard = ({
 export default OptionCard;
 
 const styles = StyleSheet.create({
+  nameContainer: {
+    flexDirection: "row",
+    gap: 8,
+  },
   name: {
     fontWeight: "bold",
     fontSize: 16,
@@ -65,7 +60,7 @@ const styles = StyleSheet.create({
     },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
-    elevation: 5,
+    elevation: 2.5,
   },
   italicText: {
     fontStyle: "italic",
