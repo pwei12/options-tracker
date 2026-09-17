@@ -1,9 +1,10 @@
+import { Text } from "@/components/ui/text";
 import { Doc } from "@/convex/_generated/dataModel";
-import { formatDateToYYYYMMDD } from "@/utils/date.utils";
+import { formatDateToYYYYMMDD, isDateExpired } from "@/utils/date.utils";
 import { useRouter } from "expo-router";
-import React from "react";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { TouchableOpacity } from "react-native";
 import StatusTag from "./StatusTag";
+import { VStack } from "./ui/vstack";
 
 type OptionCardProps = {
   option: Doc<"options">;
@@ -11,61 +12,33 @@ type OptionCardProps = {
 
 const OptionCard = ({ option }: OptionCardProps) => {
   const router = useRouter();
-  const hasExpired = new Date(option.expirationDate) < new Date();
+  const hasExpired = isDateExpired(option.expirationDate);
   const isClosed = option.closePrice !== undefined;
 
   return (
     <TouchableOpacity
-      onPress={() => router.push(`/option/${encodeURIComponent(option._id)}`)}
-      style={[styles.card, hasExpired && styles.expired]}
+      onPress={() => router.push(`/option/${option._id}`)}
+      className={`p-4 rounded-lg shadow-md ${hasExpired ? "bg-accent/50" : "bg-accent"}`}
     >
-      <View style={styles.nameContainer}>
-        <Text style={styles.name}>{option.name}</Text>
-        <StatusTag hasExpired={hasExpired} isClosed={isClosed} />
-      </View>
-      <Text>
+      <VStack className="gap-1">
+        <Text className="text-lg font-bold text-card-foreground">
+          {option.name}
+        </Text>
+      </VStack>
+      <Text className="italic text-card-foreground">
         <Text>{formatDateToYYYYMMDD(option.expirationDate)}</Text>
         {` `}
-        <Text style={styles.italicText}>{`${option.strikePrice.toFixed(
+        <Text>{`${option.strikePrice.toFixed(
           2,
         )}${option.optionType === "put" ? "P" : "C"}`}</Text>
       </Text>
-      <Text>
+      <Text className="text-card-foreground">
         <Text>{option.tradingType.toLocaleUpperCase()}</Text>{" "}
         <Text>{`$${option.premium.toFixed(2)}`}</Text>
       </Text>
+      <StatusTag hasExpired={hasExpired} isClosed={isClosed} />
     </TouchableOpacity>
   );
 };
 
 export default OptionCard;
-
-const styles = StyleSheet.create({
-  nameContainer: {
-    flexDirection: "row",
-    gap: 8,
-  },
-  name: {
-    fontWeight: "bold",
-    fontSize: 16,
-  },
-  card: {
-    backgroundColor: "#fff",
-    padding: 16,
-    borderRadius: 8,
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 2.5,
-  },
-  italicText: {
-    fontStyle: "italic",
-  },
-  expired: {
-    opacity: 0.5,
-  },
-});

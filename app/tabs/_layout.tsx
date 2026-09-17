@@ -1,8 +1,8 @@
 import CreateOrUpdateOptionModal from "@/components/CreateOrUpdateOptionModal";
+import { Pressable } from "@/components/ui/pressable";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { Tabs } from "expo-router";
 import { useState } from "react";
-import { Pressable, StyleSheet } from "react-native";
 
 export default function TabLayout() {
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -15,11 +15,13 @@ export default function TabLayout() {
       <Tabs
         screenOptions={{
           headerShown: false,
-          tabBarActiveTintColor: "#fd5f2f",
+          tabBarActiveTintColor: "#D4A017",
+          tabBarInactiveTintColor: "#ffffff",
           tabBarStyle: {
-            backgroundColor: "#25292e",
-            height: 80,
+            backgroundColor: "#654321",
+            height: 88,
           },
+          sceneStyle: { backgroundColor: "transparent" },
         }}
       >
         <Tabs.Screen
@@ -65,8 +67,8 @@ export default function TabLayout() {
 
       <Pressable
         onPress={handleModalDisclosure(true)}
-        style={styles.fab}
         accessibilityLabel="Add new option"
+        className="bg-primary w-16 h-16 rounded-full justify-center items-center absolute right-2 bottom-28 z-10 shadow-lg"
       >
         <Ionicons name="add" size={32} color="#ffffff" />
       </Pressable>
@@ -78,23 +80,3 @@ export default function TabLayout() {
     </>
   );
 }
-
-const styles = StyleSheet.create({
-  fab: {
-    position: "absolute",
-    right: 24,
-    bottom: 92,
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    backgroundColor: "#fd5f2f",
-    justifyContent: "center",
-    alignItems: "center",
-    elevation: 8,
-    shadowColor: "#000",
-    shadowOpacity: 0.25,
-    shadowRadius: 6,
-    shadowOffset: { width: 0, height: 4 },
-    zIndex: 10,
-  },
-});

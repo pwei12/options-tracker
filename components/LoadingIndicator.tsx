@@ -1,31 +1,16 @@
-import React from "react";
-import { StyleSheet, Text, View } from "react-native";
+import React, { ComponentProps } from "react";
+import { Skeleton } from "./ui/skeleton";
 
-const LoadingIndicator = () => {
+const LoadingIndicator = (props: ComponentProps<typeof Skeleton>) => {
+  const { className, ...rest } = props;
+
   return (
-    <View style={styles.container}>
-      <Text>Loading...</Text>
-    </View>
+    <Skeleton
+      variant="rounded"
+      className={`w-full h-12 rounded-md bg-muted ${className}`}
+      {...rest}
+    />
   );
 };
 
 export default LoadingIndicator;
-
-const styles = StyleSheet.create({
-  container: {
-    alignItems: "center",
-    justifyContent: "center",
-    padding: 16,
-    backgroundColor: "#fff",
-    borderRadius: 8,
-    height: 100,
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
-  },
-});

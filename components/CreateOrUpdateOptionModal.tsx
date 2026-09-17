@@ -3,18 +3,18 @@ import { Option, OptionFormSection, OptionFormValues } from "@/types/types";
 import { toDbDateString } from "@/utils/date.utils";
 import { useMutation } from "convex/react";
 import capitalize from "lodash/capitalize";
-import React from "react";
 import {
   Alert,
   KeyboardAvoidingView,
   Modal,
   Platform,
-  Pressable,
   StyleSheet,
-  Text,
-  View,
 } from "react-native";
 import OptionForm from "./OptionForm";
+import { HStack } from "./ui/hstack";
+import { Pressable } from "./ui/pressable";
+import { Text } from "./ui/text";
+import { VStack } from "./ui/vstack";
 
 type CreateOrUpdateOptionModalProps = {
   isOpen: boolean;
@@ -167,25 +167,28 @@ const CreateOrUpdateOptionModal = ({
         style={styles.modalOverlay}
         behavior={Platform.OS === "ios" ? "padding" : undefined}
       >
-        <View style={styles.modalCard}>
-          <View style={styles.headerRow}>
-            <Text style={styles.title}>
+        <VStack className="bg-muted rounded-t-3xl p-5 max-h-[90%]">
+          <HStack className="justify-between items-center mb-3">
+            <Text className="text-2xl font-bold text-muted-foreground">
               {option && section
                 ? `${capitalize(section)} Details`
                 : option
                   ? "Edit option"
                   : "New Option"}
             </Text>
-            <Pressable onPress={onClose} style={styles.closeButton}>
-              <Text style={styles.closeButtonText}>×</Text>
+            <Pressable
+              onPress={onClose}
+              className="w-8 h-8 rounded-full bg-muted/50 items-center justify-center"
+            >
+              <Text className="text-2xl text-muted-foreground">×</Text>
             </Pressable>
-          </View>
+          </HStack>
           <OptionForm
             onSubmit={handleCreateOrUpdateOption}
             initialValues={initialValues}
             section={section}
           />
-        </View>
+        </VStack>
       </KeyboardAvoidingView>
     </Modal>
   );

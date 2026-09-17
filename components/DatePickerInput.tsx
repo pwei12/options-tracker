@@ -2,8 +2,11 @@ import { normalizeDate } from "@/utils/date.utils";
 import DateTimePicker, {
   DateTimePickerEvent,
 } from "@react-native-community/datetimepicker";
-import React, { useState } from "react";
-import { Platform, Pressable, StyleSheet, Text, View } from "react-native";
+import { useState } from "react";
+import { Platform } from "react-native";
+import { Pressable } from "./ui/pressable";
+import { Text } from "./ui/text";
+import { VStack } from "./ui/vstack";
 
 type DatePickerProps = {
   value: Date | undefined;
@@ -67,7 +70,7 @@ const DatePickerInput = ({
     : placeholder;
 
   return (
-    <View>
+    <VStack className="gap-1">
       <Pressable
         accessibilityRole="button"
         accessibilityHint="Opens date picker"
@@ -76,21 +79,19 @@ const DatePickerInput = ({
         }}
         disabled={disabled}
         onPress={handlePress}
-        style={[
-          styles.input,
-          disabled && styles.disabled,
-          error && styles.inputError,
-        ]}
+        className={`flex-row items-center justify-between px-3 py-2 border border-border rounded-lg dark:bg-input/30 bg-transparent ${disabled ? "opacity-50" : ""} ${
+          error ? "border-destructive" : ""
+        }`}
       >
-        <Text style={[styles.value, !value && styles.placeholder]}>
+        <Text className={value ? "text-muted-foreground" : "text-muted"}>
           {formattedDate}
         </Text>
 
-        <Text style={styles.icon}>📅</Text>
+        <Text className="text-xl">📅</Text>
       </Pressable>
 
       {error && (
-        <Text accessibilityRole="alert" style={styles.error}>
+        <Text accessibilityRole="alert" className="text-destructive text-sm">
           {error}
         </Text>
       )}
@@ -106,43 +107,8 @@ const DatePickerInput = ({
           onTouchCancel={handleDismiss}
         />
       )}
-    </View>
+    </VStack>
   );
 };
 
 export default DatePickerInput;
-
-const styles = StyleSheet.create({
-  input: {
-    minHeight: 48,
-    borderWidth: 1,
-    borderColor: "#D1D5DB",
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    backgroundColor: "#FFFFFF",
-  },
-  value: {
-    fontSize: 16,
-    color: "#111827",
-  },
-  placeholder: {
-    color: "#9CA3AF",
-  },
-  icon: {
-    fontSize: 18,
-  },
-  disabled: {
-    opacity: 0.5,
-  },
-  inputError: {
-    borderColor: "#DC2626",
-  },
-  error: {
-    marginTop: 4,
-    fontSize: 13,
-    color: "#DC2626",
-  },
-});

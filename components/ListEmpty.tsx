@@ -1,5 +1,6 @@
-import React from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { ComponentProps } from "react";
+import { Text } from "./ui/text";
+import { VStack } from "./ui/vstack";
 
 const ListEmpty = ({
   message,
@@ -7,35 +8,16 @@ const ListEmpty = ({
   messageStyle,
 }: {
   message?: string;
-  containerStyle?: object;
-  messageStyle?: object;
+  containerStyle?: ComponentProps<typeof VStack>["className"];
+  messageStyle?: ComponentProps<typeof Text>["className"];
 }) => {
   return (
-    <View style={[styles.emptyListContainer, containerStyle]}>
-      <Text style={messageStyle}>{message ?? "No options available."}</Text>
-    </View>
+    <VStack
+      className={`bg-secondary rounded-lg h-25 justify-center items-center flex-1 ${containerStyle}`}
+    >
+      <Text className={messageStyle}>{message ?? "No options available."}</Text>
+    </VStack>
   );
 };
 
 export default ListEmpty;
-
-const styles = StyleSheet.create({
-  emptyListContainer: {
-    alignItems: "center",
-    justifyContent: "center",
-    padding: 16,
-    backgroundColor: "#fff",
-    borderRadius: 8,
-    height: 100,
-    width: "100%",
-    flex: 1,
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 2.5,
-  },
-});
