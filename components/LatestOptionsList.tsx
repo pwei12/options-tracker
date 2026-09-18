@@ -1,19 +1,20 @@
 import { api } from "@/convex/_generated/api";
 import { useQuery } from "convex/react";
-import React from "react";
-import { FlatList, StyleSheet, Text, View } from "react-native";
+import { FlatList } from "react-native";
 import ListEmpty from "./ListEmpty";
 import LoadingIndicator from "./LoadingIndicator";
 import OptionCard from "./OptionCard";
+import { Text } from "./ui/text";
+import { VStack } from "./ui/vstack";
 
 const LatestOptionsList = () => {
   const latestOptions = useQuery(api.options.getLatestOptions, { limit: 5 });
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Latest</Text>
+    <VStack className="my-2">
+      <Text className="mb-2 text-foreground font-semibold text-lg">Latest</Text>
       {latestOptions === undefined ? (
-        <LoadingIndicator />
+        <LoadingIndicator className="h-32" />
       ) : (
         <FlatList
           horizontal
@@ -21,33 +22,15 @@ const LatestOptionsList = () => {
           data={latestOptions}
           keyExtractor={(item) => item._id}
           renderItem={({ item }) => <OptionCard option={item} />}
-          ItemSeparatorComponent={() => <View style={{ width: 8 }} />}
+          ItemSeparatorComponent={() => <VStack style={{ width: 8 }} />}
           ListEmptyComponent={() => (
-            <ListEmpty
-              message="No option added yet."
-              containerStyle={{
-                width: "100%",
-                flex: 1,
-              }}
-            />
+            <ListEmpty message="No option added yet." />
           )}
           contentContainerStyle={{ flexGrow: 1 }}
         />
       )}
-    </View>
+    </VStack>
   );
 };
 
 export default LatestOptionsList;
-
-const styles = StyleSheet.create({
-  container: {
-    marginVertical: 8,
-    marginHorizontal: 16,
-  },
-  title: {
-    fontSize: 18,
-    fontWeight: "bold",
-    marginBottom: 8,
-  },
-});

@@ -1,17 +1,56 @@
 import CreateOrUpdateOptionModal from "@/components/CreateOrUpdateOptionModal";
-import LoadingIndicator from "@/components/LoadingIndicator";
 import StatusTag from "@/components/StatusTag";
+import { HStack } from "@/components/ui/hstack";
+import { Pressable } from "@/components/ui/pressable";
+import { Spinner } from "@/components/ui/spinner";
+import { Text } from "@/components/ui/text";
+import { VStack } from "@/components/ui/vstack";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { contractSize } from "@/styles/constants";
-import { formatDateWithSeparator } from "@/utils/date.utils";
+import { formatDateWithSeparator, isDateExpired } from "@/utils/date.utils";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useQuery } from "convex/react";
 import { useLocalSearchParams } from "expo-router";
-import React, { useState } from "react";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { useState } from "react";
+import { ScrollView } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Option, OptionFormSection } from "../../types/types";
+
+type SummaryCardProps = {
+  name: string;
+  net: number;
+  strikePrice: number;
+  hasExpired: boolean;
+  isClosed: boolean;
+};
+
+const SummaryCard = ({
+  name,
+  net,
+  strikePrice,
+  hasExpired,
+  isClosed,
+}: SummaryCardProps) => {
+  return (
+    <HStack className="bg-secondary justify-between p-4 rounded-lg shadow-md">
+      <VStack>
+        <Text className="text-foreground text-2xl font-bold">{name}</Text>
+        <StatusTag hasExpired={hasExpired} isClosed={isClosed} />
+      </VStack>
+      <DetailItemLayout
+        label="Profit/Loss (USD)"
+        value={`$${net.toFixed(2)}`}
+        valueStyle="text-xl"
+      />
+      <DetailItemLayout
+        label="ROI"
+        value={`${((net / (strikePrice * contractSize)) * 100).toFixed(2)}%`}
+        valueStyle="text-xl"
+      />
+    </HStack>
+  );
+};
 
 const DetailItemLayout = ({
   label,
@@ -21,14 +60,14 @@ const DetailItemLayout = ({
 }: {
   label: string;
   value: string;
-  labelStyle?: object;
-  valueStyle?: object;
+  labelStyle?: string;
+  valueStyle?: string;
 }) => {
   return (
-    <View>
-      <Text style={[styles.label, labelStyle]}>{label}</Text>
-      <Text style={valueStyle}>{value}</Text>
-    </View>
+    <VStack>
+      <Text className={`text-card-muted text-xs ${labelStyle}`}>{label}</Text>
+      <Text className={`text-sm ${valueStyle}`}>{value}</Text>
+    </VStack>
   );
 };
 
@@ -47,36 +86,40 @@ const OptionDetail = () => {
     id: id as Id<"options">,
   });
 
-  const option: Option | null = dbOption
-    ? {
-        id: dbOption._id,
-        name: dbOption.name,
-        premium: dbOption.premium,
-        strikePrice: dbOption.strikePrice,
-        expirationDate: dbOption.expirationDate,
-        optionType: dbOption.optionType,
-        tradingType: dbOption.tradingType,
-        openFee: dbOption.openFee,
-        closeFee: dbOption.closeFee,
-        openDate: dbOption.openDate,
-        closeDate: dbOption.closeDate
-          ? new Date(dbOption.closeDate).toISOString()
-          : undefined,
-        closePrice: dbOption.closePrice,
-      }
-    : null;
-
-  if (option === undefined) {
-    return <LoadingIndicator />;
-  }
-
-  if (option === null) {
+  if (dbOption === undefined) {
     return (
-      <View style={styles.container}>
-        <Text>Option not found</Text>
-      </View>
+      <SafeAreaView
+        style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
+      >
+        <Spinner size="large" color="white" />
+      </SafeAreaView>
     );
   }
+
+  if (dbOption === null) {
+    return (
+      <SafeAreaView>
+        <Text>Option not found</Text>
+      </SafeAreaView>
+    );
+  }
+
+  const option: Option = {
+    id: dbOption._id,
+    name: dbOption.name,
+    premium: dbOption.premium,
+    strikePrice: dbOption.strikePrice,
+    expirationDate: dbOption.expirationDate,
+    optionType: dbOption.optionType,
+    tradingType: dbOption.tradingType,
+    openFee: dbOption.openFee,
+    closeFee: dbOption.closeFee,
+    openDate: dbOption.openDate,
+    closeDate: dbOption.closeDate
+      ? new Date(dbOption.closeDate).toISOString()
+      : undefined,
+    closePrice: dbOption.closePrice,
+  };
 
   const {
     name,
@@ -98,7 +141,7 @@ const OptionDetail = () => {
       : (closePrice ?? 0) - premium;
   const net = profitOrLoss - openFee - (closeFee ?? 0);
 
-  const hasExpired = new Date(expirationDate) < new Date();
+  const hasExpired = isDateExpired(expirationDate);
   const isClosed = closePrice !== undefined;
 
   const optionDetails = [
@@ -111,7 +154,7 @@ const OptionDetail = () => {
     {
       label: "Expiration",
       value: formatDateWithSeparator(expirationDate),
-      valueStyle: hasExpired ? styles.expiredValue : undefined,
+      valueStyle: hasExpired ? "text-destructive" : undefined,
     },
   ];
 
@@ -147,78 +190,73 @@ const OptionDetail = () => {
   ];
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={{ flex: 1 }}>
       <ScrollView
-        style={styles.scrollView}
+        className="flex-1"
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={{ paddingBottom: 24 }}
       >
-        <View style={styles.summaryContainer}>
-          <View>
-            <Text style={styles.title}>{name}</Text>
-            <StatusTag hasExpired={hasExpired} isClosed={isClosed} />
-          </View>
-          <DetailItemLayout
-            label="Profit/Loss (USD)"
-            value={`$${net.toFixed(2)}`}
-            labelStyle={styles.darkLabel}
-          />
-          <DetailItemLayout
-            label="ROI"
-            value={`${((net / (strikePrice * contractSize)) * 100).toFixed(2)}%`}
-            labelStyle={styles.darkLabel}
-          />
-        </View>
-
-        <View style={styles.sectionContainer}>
-          <View style={styles.headerRow}>
-            <Text style={styles.title}>Option Details</Text>
+        <SummaryCard
+          name={name}
+          net={net}
+          strikePrice={strikePrice}
+          hasExpired={hasExpired}
+          isClosed={isClosed}
+        />
+        <VStack className="mt-6 gap-2">
+          <HStack className="justify-between items-center mb-2">
+            <Text className="text-xl text-foreground font-semibold">
+              Option Details
+            </Text>
             <Pressable
               accessibilityRole="button"
               accessibilityLabel="Edit option"
               onPress={() =>
                 setEditModalState({ isOpen: true, section: "option" })
               }
-              style={styles.editButton}
+              className="w-8 h-8 rounded-full bg-accent justify-center items-center"
             >
-              <Ionicons name="pencil" size={18} color="#1f2937" />
+              <Ionicons name="pencil" size={16} color="#ffffff" />
             </Pressable>
-          </View>
-          <View style={styles.detailsContainer}>
+          </HStack>
+          <VStack className="bg-primary p-4 rounded-lg shadow-md gap-3">
             {optionDetails.map((item) => (
-              <View key={item.label} style={styles.detailRow}>
-                <DetailItemLayout
-                  label={item.label}
-                  value={item.value}
-                  valueStyle={item.valueStyle}
-                />
-              </View>
+              <DetailItemLayout
+                key={item.label}
+                label={item.label}
+                value={item.value}
+                valueStyle={item.valueStyle ? "text-destructive" : undefined}
+              />
             ))}
-          </View>
-        </View>
+          </VStack>
+        </VStack>
 
-        <View style={styles.sectionContainer}>
-          <View style={styles.headerRow}>
-            <Text style={styles.title}>Trading Details</Text>
+        <VStack className="mt-6 gap-2 bg-card">
+          <HStack className="justify-between items-center mb-2">
+            <Text className="text-xl text-foreground font-semibold">
+              Trading Details
+            </Text>
             <Pressable
               accessibilityRole="button"
               accessibilityLabel="Edit option"
               onPress={() =>
                 setEditModalState({ isOpen: true, section: "trading" })
               }
-              style={styles.editButton}
+              className="w-8 h-8 rounded-full bg-accent justify-center items-center"
             >
-              <Ionicons name="pencil" size={16} color="#1f2937" />
+              <Ionicons name="pencil" size={16} color="#ffffff" />
             </Pressable>
-          </View>
-          <View style={styles.detailsContainer}>
+          </HStack>
+          <VStack className="bg-primary p-4 rounded-lg shadow-md gap-3">
             {tradingDetails.map((item) => (
-              <View key={item.label} style={styles.detailRow}>
-                <DetailItemLayout label={item.label} value={item.value} />
-              </View>
+              <DetailItemLayout
+                key={item.label}
+                label={item.label}
+                value={item.value}
+              />
             ))}
-          </View>
-        </View>
+          </VStack>
+        </VStack>
       </ScrollView>
 
       <CreateOrUpdateOptionModal
@@ -232,80 +270,3 @@ const OptionDetail = () => {
 };
 
 export default OptionDetail;
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 12,
-  },
-  scrollView: {
-    flex: 1,
-  },
-  scrollContent: {
-    paddingBottom: 24,
-  },
-  summaryContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    padding: 16,
-    marginVertical: 16,
-    backgroundColor: "#9abaf5",
-    borderRadius: 8,
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
-  },
-  sectionContainer: {
-    marginVertical: 16,
-  },
-  headerRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginBottom: 12,
-  },
-  title: {
-    fontWeight: "bold",
-    fontSize: 20,
-  },
-  statusTagLabel: {
-    fontSize: 12,
-  },
-  editButton: {
-    width: 32,
-    height: 32,
-    borderRadius: 19,
-    backgroundColor: "#dbeafe",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  detailsContainer: {
-    backgroundColor: "#f9f9f9",
-    padding: 16,
-    borderRadius: 8,
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
-  },
-  detailRow: {
-    marginBottom: 12,
-  },
-  label: {
-    fontSize: 12,
-    color: "gray",
-  },
-  darkLabel: { color: "#4d4b4b" },
-  expiredValue: {
-    color: "red",
-  },
-});

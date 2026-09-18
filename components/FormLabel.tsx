@@ -1,30 +1,18 @@
-import { StyleSheet, Text, TextStyle } from "react-native";
+import { ComponentProps } from "react";
+import { Text } from "./ui/text";
 
 interface FormLabelProps {
   label: string;
   isRequired?: boolean;
-  style?: TextStyle;
+  style?: ComponentProps<typeof Text>["className"];
 }
 
 const FormLabel = ({ label, isRequired = false, style }: FormLabelProps) => {
   return (
-    <Text style={[styles.labelText, style]}>
-      {label}
-      {isRequired && <Text style={styles.asterisk}> *</Text>}
+    <Text className={`font-medium text-md text-muted-foreground ${style}`}>
+      {label} {isRequired && <Text className="text-destructive">*</Text>}
     </Text>
   );
 };
 
 export default FormLabel;
-
-const styles = StyleSheet.create({
-  labelText: {
-    fontSize: 14,
-    color: "#333333",
-    fontWeight: "500",
-    marginBottom: 4,
-  },
-  asterisk: {
-    color: "#FF0000",
-  },
-});

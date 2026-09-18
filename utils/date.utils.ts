@@ -30,6 +30,13 @@ export const getToday = (): Date => {
   return date;
 };
 
+export const isDateExpired = (date: string): boolean => {
+  const [year, month, day] = date.slice(0, 10).split("-").map(Number);
+  const endOfDate = new Date(year, month - 1, day, 23, 59, 59, 999);
+
+  return endOfDate < getToday();
+};
+
 export const toDbDateString = (date: Date): string => {
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, "0");

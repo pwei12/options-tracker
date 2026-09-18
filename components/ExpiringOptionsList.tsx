@@ -1,11 +1,13 @@
 import { api } from "@/convex/_generated/api";
 import { useQuery } from "convex/react";
 import { Link } from "expo-router";
-import React from "react";
-import { FlatList, StyleSheet, Text, View } from "react-native";
+import { FlatList } from "react-native";
 import ListEmpty from "./ListEmpty";
 import LoadingIndicator from "./LoadingIndicator";
 import OptionCard from "./OptionCard";
+import { HStack } from "./ui/hstack";
+import { Text } from "./ui/text";
+import { VStack } from "./ui/vstack";
 
 const ExpiringOptionsList = () => {
   const expiringOptions = useQuery(api.options.getSoonestExpiringOptions, {
@@ -13,15 +15,17 @@ const ExpiringOptionsList = () => {
   });
 
   return (
-    <View style={styles.container}>
-      <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-        <Text style={styles.title}>Expiring</Text>
-        <Link href="/tabs/list" style={styles.link}>
-          All
+    <VStack className="my-2">
+      <HStack className="justify-between">
+        <Text className="mb-2 text-foreground font-semibold text-lg">
+          Expiring
+        </Text>
+        <Link href="/tabs/list">
+          <Text className="text-link">All</Text>
         </Link>
-      </View>
+      </HStack>
       {expiringOptions === undefined ? (
-        <LoadingIndicator />
+        <LoadingIndicator className="h-28" />
       ) : (
         <FlatList
           data={expiringOptions}
@@ -30,27 +34,11 @@ const ExpiringOptionsList = () => {
           ListEmptyComponent={() => (
             <ListEmpty message="No expiring options found." />
           )}
-          ItemSeparatorComponent={() => <View style={{ height: 16 }} />}
+          ItemSeparatorComponent={() => <VStack className="h-4" />}
         />
       )}
-    </View>
+    </VStack>
   );
 };
 
 export default ExpiringOptionsList;
-
-const styles = StyleSheet.create({
-  container: {
-    marginVertical: 8,
-    marginHorizontal: 16,
-  },
-  title: {
-    fontSize: 18,
-    fontWeight: "bold",
-    marginBottom: 8,
-  },
-  link: {
-    fontSize: 16,
-    color: "blue",
-  },
-});

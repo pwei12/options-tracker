@@ -1,10 +1,12 @@
 import ListEmpty from "@/components/ListEmpty";
 import LoadingIndicator from "@/components/LoadingIndicator";
 import OptionCard from "@/components/OptionCard";
+import { HStack } from "@/components/ui/hstack";
+import { Spinner } from "@/components/ui/spinner";
+import { VStack } from "@/components/ui/vstack";
 import { api } from "@/convex/_generated/api";
 import { usePaginatedQuery } from "convex/react";
-import React from "react";
-import { ActivityIndicator, FlatList, StyleSheet, View } from "react-native";
+import { FlatList } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const BATCH_SIZE = 10;
@@ -26,14 +28,14 @@ const List = () => {
   const renderFooter = () => {
     if (status !== "LoadingMore") return null;
     return (
-      <View style={styles.loaderContainer}>
-        <ActivityIndicator size="small" color="#0000ff" />
-      </View>
+      <VStack className="py-5">
+        <Spinner size="small" color="white" />
+      </VStack>
     );
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView>
       {status === "LoadingFirstPage" ? (
         <LoadingIndicator />
       ) : (
@@ -42,7 +44,7 @@ const List = () => {
           keyExtractor={(item) => item._id}
           renderItem={({ item }) => <OptionCard option={item} />}
           showsVerticalScrollIndicator={false}
-          ItemSeparatorComponent={() => <View style={{ height: 16 }} />}
+          ItemSeparatorComponent={() => <HStack style={{ height: 16 }} />}
           ListEmptyComponent={() => (
             <ListEmpty message="No option added yet." />
           )}
@@ -56,14 +58,3 @@ const List = () => {
 };
 
 export default List;
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    margin: 16,
-  },
-  loaderContainer: {
-    paddingVertical: 20,
-    alignItems: "center",
-  },
-});
